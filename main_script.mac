@@ -1,0 +1,22 @@
+reset()$
+clear(all)$
+kill(all)$
+batch("funzioni.mac")$
+batch("matrici_trasformazione.mac")$
+batch("calcolo_energia.mac")$
+batch("unit_test.mac")$
+
+
+
+"
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+INIZIO SCRIPT DI TEST
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+"$
+
+
+batch("test_files/a9_denavit_hartenberg.mac")$

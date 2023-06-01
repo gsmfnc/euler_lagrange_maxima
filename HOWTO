@@ -1,0 +1,5 @@
+scrivere:
+    source alias
+
+eseguire:
+    c <path dello script>

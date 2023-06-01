@@ -1,0 +1,76 @@
+"
+
+
+
+VERIFICA DELLA PROPRIETÀ: Rz(theta) = Rx(pi/2)*Ry(theta)*Rx(-pi/2)
+
+"$
+Rz_theta : matrice_rotazione(theta, z)$
+
+Rx : matrice_rotazione(%pi/2, x)$
+Ry_theta : matrice_rotazione(theta, y)$
+Rx_inverse : matrice_rotazione(-%pi/2, x)$
+
+test_proprieta_coord_eulero(Rz_theta, Rx, Ry_theta, Rx_inverse)$
+"
+
+
+
+VERIFICA DELLA PROPRIETÀ: Rz(theta) = Rx(-pi/2)*Ry(theta)*Rx(pi/2)
+
+"$
+Rx : matrice_rotazione(-%pi/2, x)$
+Ry_theta : matrice_rotazione(-theta, y)$
+Rx_inverse : matrice_rotazione(%pi/2, x)$
+
+test_proprieta_coord_eulero(Rz_theta, Rx, Ry_theta, Rx_inverse)$
+"
+
+
+
+VERIFICA DELLA PROPRIETÀ: Rz(theta) = Ry(pi/2)*Rx(-theta)*Ry(-pi/2)
+
+"$
+Ry : matrice_rotazione(%pi/2, y)$
+Rx_theta : matrice_rotazione(-theta, x)$
+Ry_inverse : matrice_rotazione(-%pi/2, y)$
+
+test_proprieta_coord_eulero(Rz_theta, Ry, Rx_theta, Ry_inverse)$
+"
+
+
+
+VERIFICA DELLA PROPRIETÀ: Rz(theta) = Ry(-pi/2)*Rx(-theta)*Ry(pi/2)
+
+"$
+Ry : matrice_rotazione(-%pi/2, y)$
+Rx_theta : matrice_rotazione(theta, x)$
+Ry_inverse : matrice_rotazione(%pi/2, y)$
+
+test_proprieta_coord_eulero(Rz_theta, Ry, Rx_theta, Ry_inverse)$
+"
+
+
+
+VERIFICA DELLA PROPRIETÀ: Ry(theta) = Rz(pi/2)*Rx(theta)*Rz(-pi/2)
+
+"$
+Ry_theta : matrice_rotazione(theta, y)$
+Rz : matrice_rotazione(%pi/2, z)$
+Rx_theta : matrice_rotazione(theta, x)$
+Rz_inverse : matrice_rotazione(-%pi/2, z)$
+
+test_proprieta_coord_eulero(Ry_theta, Rz, Rx_theta, Rz_inverse)$
+"
+
+
+
+VERIFICA DELLA PROPRIETÀ: Ry(theta) = Rz(-pi/2)*Rx(-theta)*Rz(pi/2)
+
+"$
+Ry_theta : matrice_rotazione(theta, y)$
+Rz : matrice_rotazione(-%pi/2, z)$
+Rx_theta : matrice_rotazione(-theta, x)$
+Rz_inverse : matrice_rotazione(%pi/2, z)$
+
+test_proprieta_coord_eulero(Ry_theta, Rz, Rx_theta, Rz_inverse)$

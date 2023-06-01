@@ -1,0 +1,374 @@
+verifica_matrice_rotazione(M) := block(
+    [matrice, determinante, R, M_trasposta, result],
+    result : 0,
+    M_trasposta : transpose(M),
+    R : M . M_trasposta,
+
+    determinante : trigsimp(determinant(R)),
+    R : trigsimp(R),
+
+    if (R = ident(length(R)) and determinante = 1) then
+        result : 1,
+
+    result
+)$
+
+matrice_rotazione_z(theta) := block(
+    [matrice],
+    matrice : matrix(
+        [cos(theta),    -sin(theta),    0],
+        [sin(theta),    cos(theta),     0],
+        [0,             0,              1]
+    )
+)$
+
+matrice_rotazione_x(theta) := block(
+    [matrice],
+    matrice : matrix(
+        [1,     0,              0],
+        [0,     cos(theta),     -sin(theta)],
+        [0,     sin(theta),     cos(theta)]
+    )
+)$
+
+matrice_rotazione_y(theta) := block(
+    [matrice],
+    matrice : matrix(
+        [cos(theta),    0,    sin(theta)],
+        [0,             1,    0],
+        [-sin(theta),   0,    cos(theta)]
+    )
+)$
+
+matrice_rotazione(theta, asse) := block(
+    [matrice],
+
+    if (asse = x) then matrice : matrice_rotazione_x(theta),
+    if (asse = y) then matrice : matrice_rotazione_y(theta),
+    if (asse = z) then matrice : matrice_rotazione_z(theta),
+    if (asse#x and asse#y and asse#z) then
+        matrice : "L'asse deve essere uno tra x, y e z",
+    matrice
+)$
+
+matrice_rotazione_generica(asse, theta) := block(
+    [norma, n, expA, scalar_check, r, versore],
+
+    norma : norma_euclidea(asse),
+    n : length(asse),
+    expA : ident(3),
+    scalar_check : scalarp(theta),
+    r : 0,
+    versore : fraziona(asse),
+
+    if norma # 1 then (
+        theta : ratsimp(norma * theta),
+        versore : normalizza_asse(versore),
+        norma : 1
+    ),
+
+    if n = 3 and float(norma) = 1.0 and scalar_check then (
+
+        matriceS : matrice_anti_simmetrica(versore),
+        II : ident(3),
+        A : invert(s * II - matriceS),
+        for i: 1 thru n do (
+            for j: 1 thru n do (
+                expA[i][j] : ilt(ratsimp(expand(A[i][j])), s, theta)
+            )
+        ),
+        expA : trigsimp(expA),
+        if verifica_matrice_rotazione(expA) = 1 then r : expA
+    ),
+
+    if n # 3 then r : -1,
+    if float(norma) # 1.0 then r : -2,
+    if scalar_check = false then r : -3, 
+
+    trigsimp(ratsimp((expand(r))))
+)$
+
+formula_rodrigues(asse, theta) := block(
+    [norma, versore, rotazione, scalar_check, matriceS, II, R],
+
+    scalar_check : scalarp(theta),
+    versore : fraziona(asse),
+    norma : norma_euclidea(versore),
+    n : length(versore),
+    R : 0,
+
+    if n # 3 then R : -1,
+    if scalar_check = false then R : -2,
+
+    if norma # 1 then (
+        theta : norma * theta,
+        versore : normalizza_asse(versore),
+        norma : 1
+    ),
+
+    if n = 3 and float(norma) = 1.0 and scalar_check then (
+
+        matriceS : matrice_anti_simmetrica(versore),
+        II : ident(3),
+        R : II + sin(theta) * matriceS + (1-cos(theta)) * matriceS.matriceS
+    ),
+
+    trigsimp(ratsimp((expand(R))))
+)$
+
+inversa_rodrigues(R) := block(
+    [theta, v, check_rot, n, II, s, c, a, norma, vec],
+
+    theta : 0,
+    v : 0,
+    vec : [0, 0, 0],
+    check_rot : verifica_matrice_rotazione(R),
+    n : length(R),
+    II : ident(3),
+    a : 0,
+
+    if (check_rot = 1 and n = 3) then (
+        v : args (nullspace((R-II))),
+        print(nullspace(R-II)),
+        v : ratsimp(v[1]),
+
+        norma : ratsimp(factorsum(norma_euclidea(transpose(v)))),
+        for i:1 thru 3 do (
+            vec[i] : ratsimp(factorsum(trigsimp(v[i][1]/norma)))
+        ),
+
+        print(vec),
+
+        matriceS : matrice_anti_simmetrica(vec),
+        A : 1/2 * (R - transpose(ratsimp(R))),
+
+        for i: 1 thru n do (
+            for j: 1 thru n do (
+                if (matriceS[i][j] # 0 and A[i][j] # 0) then (
+                    s : trigsimp(A[i][j] / matriceS[i][j])
+                )
+            )
+        ),
+
+        matriceSquad : matriceS . matriceS,
+        B : 1/2 * (R + ratsimp(transpose(R))) - II,
+
+        for i: 1 thru n do (
+            for j: 1 thru n do (
+                if (matriceSquad[i][j] # 0 and B[i][j] # 0) then
+                    c : trigsimp(B[i][j] / matriceSquad[i][j])
+            )
+        ),
+
+        c : 1 - c,
+
+        theta : my_atan2(s, c)
+    ),
+
+    if (check_rot # 1) then (
+        theta : -1,
+        v : -1
+    ),
+
+    if (n # 3) then (
+        theta : -2,
+        v : -2
+    ),
+
+    [[theta, vec], [-theta, -vec]]
+)$
+
+matrice_avvitamento(asse, theta, d) := block(
+
+    [scalar_check, v, n, A, T, R, versore, norma],
+
+    versore : fraziona(asse),
+    norma : norma_euclidea(versore),
+    n : length(versore),
+    A : 0,
+
+    if (scalarp(theta) = true and scalarp(d) = true) then
+        scalar_check : true,
+    if (scalarp(theta) = false or scalarp(d) = false) then
+        scalar_check : false,
+
+    if n # 3 then A : -1,
+    if scalar_check = false then A : -2,
+
+    if norma # 1 then (
+        theta : norma * theta,
+        versore : normalizza_asse(versore),
+        norma : 1
+    ),
+
+    if n = 3 and float(norma) = 1.0 and scalar_check = true then (
+
+        R : formula_rodrigues(asse, theta),
+        T : versore * d,
+        
+        A : matrix(
+            [R[1][1], R[1][2], R[1][3], T[1]],
+            [R[2][1], R[2][2], R[2][3], T[2]],
+            [R[3][1], R[3][2], R[3][3], T[3]],
+            [0, 0, 0, 1]
+        )
+    ),
+
+    A
+)$
+
+matrice_avvitamento_x(theta, d) := block(
+
+    matrice_avvitamento([1, 0, 0], theta, d)
+)$
+
+matrice_avvitamento_z(theta, d) := block(
+
+    matrice_avvitamento([0, 0, 1], theta, d)
+)$
+
+matrice_prodotto_avvitamenti(theta, d, alpha, a) := block(
+
+    [A, B, R],
+
+    A : matrice_avvitamento_z(theta, d),
+    B : matrice_avvitamento_x(alpha, a),
+    R : A . B,
+
+    R
+)$
+
+denavit_hartenberg(M) := block(
+    [n, R, i],
+
+    n : length(M),
+    R : ident(4),
+
+    for i: 1 thru n do (
+        if (length(M[i]) # 4) then R : -1
+    ),
+
+    if (n = 0) then R : -1,
+
+    if (n > 0 and R # -1) then (
+        for i: n step -1 thru 1 do (
+            R : matrice_prodotto_avvitamenti(M[i][1], M[i][2],
+                    M[i][3], M[i][4]) . R,
+
+            if (i # n and (M[i][3] = 0 or abs(M[i][3]) = %pi)) then (
+                R : trigreduce(factor(R))
+            )
+        )
+    ),
+
+    R
+)$
+
+stampa_terne() := block(
+    declare(phi, scalar),
+
+    let(sin(phi[x]), s[x]),
+    let(sin(phi[y]), s[y]),
+    let(sin(phi[z]), s[z]),
+    let(cos(phi[x]), c[x]),
+    let(cos(phi[y]), c[y]),
+    let(cos(phi[z]), c[z]),
+
+    let(sin(phi[x1]), s[x1]),
+    let(sin(phi[y1]), s[y1]),
+    let(sin(phi[z1]), s[z1]),
+    let(cos(phi[x1]), c[x1]),
+    let(cos(phi[y1]), c[y1]),
+    let(cos(phi[z1]), c[z1]),
+
+    let(sin(phi[x2]), s[x2]),
+    let(sin(phi[y2]), s[y2]),
+    let(sin(phi[z2]), s[z2]),
+    let(cos(phi[x2]), c[x2]),
+    let(cos(phi[y2]), c[y2]),
+    let(cos(phi[z2]), c[z2]),
+
+    print(""),
+    print("TERNA XYZ"),
+    print(""),
+    xyz : matrice_rotazione_x(phi[x]) . matrice_rotazione_y(phi[y]) .
+            matrice_rotazione_z(phi[z]),
+    print(letsimp(xyz)),
+
+    print(""),
+    print("TERNA XZY"),
+    print(""),
+    xzy : matrice_rotazione_x(phi[x]) . matrice_rotazione_z(phi[z]) .
+            matrice_rotazione_y(phi[y]),
+    print(letsimp(xzy)),
+
+    print(""),
+    print("TERNA YXZ"),
+    print(""),
+    yxz : matrice_rotazione_y(phi[y]) . matrice_rotazione_x(phi[x]) .
+            matrice_rotazione_z(phi[z]),
+    print(letsimp(yxz)),
+
+    print(""),
+    print("TERNA YZX"),
+    print(""),
+    yzx : matrice_rotazione_y(phi[y]) . matrice_rotazione_z(phi[z]) .
+            matrice_rotazione_x(phi[x]),
+    print(letsimp(yzx)),
+
+    print(""),
+    print("TERNA ZXY"),
+    print(""),
+    zxy : matrice_rotazione_z(phi[z]) . matrice_rotazione_x(phi[x]) .
+            matrice_rotazione_y(phi[y]),
+    print(letsimp(zxy)),
+
+    print(""),
+    print("TERNA ZYX"),
+    print(""),
+    zyx : matrice_rotazione_z(phi[z]) . matrice_rotazione_y(phi[y]) .
+            matrice_rotazione_x(phi[x]),
+    print(letsimp(zyx)),
+
+    print(""),
+    print("TERNA XYX"),
+    print(""),
+    xyx : matrice_rotazione_x(phi[x1]) . matrice_rotazione_y(phi[y]) .
+            matrice_rotazione_x(phi[x2]),
+    print(letsimp(xyx)),
+
+    print(""),
+    print("TERNA XZX"),
+    print(""),
+    xzx : matrice_rotazione_x(phi[x1]) . matrice_rotazione_z(phi[z]) .
+            matrice_rotazione_x(phi[x2]),
+    print(letsimp(xzx)),
+
+    print(""),
+    print("TERNA YXY"),
+    print(""),
+    yxy : matrice_rotazione_y(phi[y1]) . matrice_rotazione_x(phi[x]) .
+            matrice_rotazione_y(phi[y2]),
+    print(letsimp(yxy)),
+
+    print(""),
+    print("TERNA YZY"),
+    print(""),
+    yzy : matrice_rotazione_y(phi[y1]) . matrice_rotazione_z(phi[z]) .
+            matrice_rotazione_y(phi[y2]),
+    print(letsimp(yzy)),
+
+    print(""),
+    print("TERNA ZXZ"),
+    print(""),
+    zxz : matrice_rotazione_z(phi[z1]) . matrice_rotazione_x(phi[x]) .
+            matrice_rotazione_z(phi[z2]),
+    print(letsimp(zxz)),
+
+    print(""),
+    print("TERNA ZYZ"),
+    print(""),
+    zyz : matrice_rotazione_z(phi[z1]) . matrice_rotazione_y(phi[y]) .
+            matrice_rotazione_z(phi[z2]),
+    print(letsimp(zyz))
+);

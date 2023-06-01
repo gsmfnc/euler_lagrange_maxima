@@ -1,0 +1,19 @@
+/*
+A : matrix([1, 2], [2, 3])$
+test_inversa_rodrigues(A)$
+*/
+
+R : formula_rodrigues([1, 0, 0], %pi/3)$
+test_inversa_rodrigues(R)$
+
+R : formula_rodrigues([1, 1, 1], %pi/3)$
+test_inversa_rodrigues(R)$
+
+R : formula_rodrigues([1.1, 1, 1/2], %pi/5)$
+test_inversa_rodrigues(R)$
+
+R : formula_rodrigues([1.0001, 1.111023, 1/2], %pi/5)$
+test_inversa_rodrigues(R)$
+
+R : formula_rodrigues([0, 1.1, 1], %pi/2)$
+test_inversa_rodrigues(R)$

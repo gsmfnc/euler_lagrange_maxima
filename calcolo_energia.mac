@@ -1,0 +1,223 @@
+declare(q, scalar)$
+declare(L, scalar)$
+
+cartesiano_bc : matrix(
+    [0, q[1], -%pi/2, 0, [0, L[1]/2, 0]],
+    [-%pi/2, q[2], -%pi/2, 0, [0, L[2]/2, 0]],
+    [0, q[3], 0, 0, [0, 0, -L[3]/2]]
+)$
+
+polsosferico_bc : matrix(
+    [q[1], L[1], -%pi/2, 0, [0, -L[1]/2, 0]],
+    [q[2], 0, -%pi/2, 0, [0, 0, 0]],
+    [q[3], L[2], 0, 0, [0, 0, -L[2]/2]]
+)$
+
+antropomorfo_bc : matrix(
+    [q[1], L[1], -%pi/2, 0, [0, L[1]/2, 0]],
+    [q[2], 0, 0, L[2], [-L[2]/2, 0, 0]],
+    [q[3], 0, 0, L[3], [-L[3]/2, 0, 0]]
+)$
+
+cilindrico_bc : matrix(
+    [q[1], L[1], 0, 0, [0, 0, L[1]/2]],
+    [0, q[2], -%pi/2, 0, [0, L[2]/2, 0]],
+    [0, q[3], 0, 0, [0, 0, -L[3]/2]]
+)$
+
+sferico_bc : matrix (
+    [q[1], L[1], %pi/2, 0, [0, -L[1]/2, 0]],
+    [q[2], 0, %pi/2, L[2], [0, 0, 0]],
+    [0, q[3], 0, 0, [0, 0, -L[3]/2]]
+)$
+
+sfericostanford_bc : matrix(
+    [q[1], L[1], -%pi/2, 0, [0, L[1]/2, 0]],
+    [q[2], L[2], %pi/2, 0, [0, -L[2]/2, 0]],
+    [0, q[3], 0, 0, [0, 0, -L[3]/2]]
+)$
+
+matrice_inerzia(i) := matrix(
+    [I[i,x], 0, 0],
+    [0, I[i,y], 0],
+    [0, 0, I[i,z]]
+)$
+
+rotation_jacobian(M, var, vel_vec) := block (
+    [n, m, l, i, k, J],
+
+    J : 0,
+
+    n : length(M),
+    m : length(M[1]),
+    l : length(var),
+
+    J : zeromatrix(n, m),
+
+    for i: 1 thru n do (
+        for k: 1 thru m do (
+            J[i][k] : jacobian([M[i][k]], var) . transpose(vel_vec)
+        )
+    ),
+    J
+)$
+
+vector_jacobian(M, var) := block (
+    [n, m, l, i, k, J],
+
+    J : 0,
+
+    n : length(M),
+    l : length(var),
+
+    J : zeromatrix(n, l),
+
+    for i: 1 thru n do (
+        for k: 1 thru l do (
+            J[i][k] : diff(M[i], var[k]),
+            if (scalarp(J[i][k]) = false) then J[i][k] : J[i][k][1]
+        )
+    ),
+    J
+)$
+
+my_submatrix(M, rows, cols) := block (
+    [Q, n, m, i, j],
+
+    n : length(M),
+    m : length(M[1]),
+
+    if (rows[2] > n) then ( print("Invalid arguments"), return -1),
+    if (rows[1] < 1) then ( print("Invalid arguments"), return -1),
+    if (cols[2] > m) then ( print("Invalid arguments"), return -1),
+    if (cols[1] < 1) then ( print("Invalid arguments"), return -1),
+
+    Q : zeromatrix(rows[2] - rows[1] + 1, cols[2] - cols[1] + 1),
+
+    for i: rows[1] thru rows[2] do (
+        for j: cols[1] thru cols[2] do (
+            Q[i - rows[1] + 1][j - cols[1] + 1] : M[i][j]
+        )
+    ),
+    Q
+)$
+
+calcolo_energia_cinetica_link(Q, bc, q_vars, v_vars, i) := block(
+    [R, d, dot_d, dot_R, M, S, omega, Bt, Bw, T],
+
+    T : 0,
+    R : my_submatrix(Q, [1, 3], [1, 3]),
+    d : my_submatrix(Q, [1, 3], [4, 4]) + R . transpose(bc),
+
+    dot_d : vector_jacobian(d, q_vars) . transpose(v_vars),
+    dot_R : rotation_jacobian(R, q_vars, v_vars),
+
+    T : 1/2 * M[i] * (transpose(dot_d) . dot_d),
+
+    S : (dot_R . transpose(R)),
+    omega : trigsimp(transpose(matrix([S[3][2], S[1][3], S[2][1]]))),
+
+    T : T + 1/2 * 
+        (transpose(omega) . R)
+        . matrice_inerzia(i) .
+        (transpose(R) . omega),
+
+    Jt : vector_jacobian(d, q_vars),
+    Bt : M[i] * (transpose(Jt) . Jt),
+    Jw : vector_jacobian(omega, v_vars),
+    Bw : (transpose(Jw) . R)
+            . matrice_inerzia(i) .
+         (transpose(R) . Jw),
+
+    [trigsimp(T), trigsimp(Bt), trigsimp(Bw)]
+)$
+
+calcolo_energia_cinetica(DH) := block (
+    [i, n, q, v, T, Bt, Bw, res, q_vars, v_vars, finalT, c],
+
+    n : length(DH),
+    T : 0,
+    q_vars : [],
+    v_vars : [],
+    finalT : 0,
+    res : [0, zeromatrix(n, 3), zeromatrix(n, 3)],
+
+    for i: 1 thru n do (
+        q_vars : append(q_vars, [q[i]]),
+        v_vars : append(v_vars, [v[i]])
+    ),
+
+    Bt : [],
+    Bw : [],
+    for i: 1 thru length(q_vars) do (
+        Bt : append(Bt, [zeromatrix(length(q_vars), length(q_vars))]),
+        Bw : append(Bw, [zeromatrix(length(q_vars), length(q_vars))])
+    ),
+
+    for i: 1 thru n do (
+        Q : denavit_hartenberg(my_submatrix(DH, [1, i], [1, 4])),
+        res : calcolo_energia_cinetica_link(Q, DH[i][5], q_vars, v_vars, i),
+
+        T : T + res[1],
+        Bt[i] : res[2],
+        Bw[i] : res[3]
+    ),
+/*
+    T : collectterms(expand(T), v[1]),
+    for i: 2 thru n do (
+        T : collectterms(T, v[i])
+    ),
+
+    for i: 1 thru n do (
+        c : ratsimp(coeff(T, v[i]^2)),
+        finalT : finalT + c * v[i]^2
+    ),
+*/
+    [T, Bt, Bw]
+)$
+
+calcolo_energia_potenziale(DH) := block (
+    [U, g_transposed, g, i, n, Q, bc, R, d, M],
+
+    n : length(DH),
+    U : 0,
+    g_transposed : matrix([g[x], g[y], g[z]]),
+
+    for i: 1 thru n do (
+        Q : denavit_hartenberg(my_submatrix(DH, [1, i], [1, 4])),
+        bc : DH[i][5],
+        R : my_submatrix(Q, [1, 3], [1, 3]),
+        d : my_submatrix(Q, [1, 3], [4, 4]) + R . transpose(bc),
+        U : U + M[i] * g_transposed . d
+    ),
+    U : -collectterms(U, [g[x], g[y], g[z]])
+)$
+
+eulero_lagrange(DH) := block(
+    [T, U, L, n, q, v, i, equations, res, f, s, t],
+
+    equations : [],
+
+    n : length(DH),
+    T : calcolo_energia_cinetica(DH)[1],
+    U : calcolo_energia_potenziale(DH),
+
+    L : T - U,
+
+    t : 0,
+    for i: 1 thru n do (
+        f : diff(L, q[i]),
+        s : diff(L, v[i]),
+        for j: 1 thru n do(
+            t : t + diff(s, q[j]) * v[j] + diff(s, v[j]) * a[j]
+        ),
+        res : f - t,
+        equations : append(equations, [res = u[i]])
+    ),
+
+    for i: 1 thru length(equations) do (
+        equations[i] : trigsimp(lhs(equations[i])) = u[i]
+    ),
+
+    [equations, U]
+)$

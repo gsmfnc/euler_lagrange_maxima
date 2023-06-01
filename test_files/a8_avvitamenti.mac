@@ -1,0 +1,6 @@
+declare(theta, scalar)$
+declare(d, scalar)$
+
+test_matrice_avvitamento([1, 1, 1], theta, d)$
+test_matrice_avvitamento([1, 0, 0], theta, d)$
+test_matrice_avvitamento([0, 0, 1], theta, d)$

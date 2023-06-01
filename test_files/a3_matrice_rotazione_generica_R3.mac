@@ -1,0 +1,42 @@
+declare(theta, scalar);
+asse : [1, 0, 0]$
+R : matrice_rotazione_generica(asse, theta)$
+T : matrice_rotazione(theta, x)$
+
+if R#T then print("ATTENZIONE: errore")$
+if R=-1 then print("Bisogna fornire un vettore di 3 componenti")$
+if R=-2 then print("Bisogna fornire un vettore che sia un versore")$
+if R=-3 then print("Bisogna fornire un'angolo theta scalare")$
+
+asse : [0, 1, 0]$
+R : matrice_rotazione_generica(asse, theta)$
+T : matrice_rotazione(theta, y)$
+
+if R#T then print("ATTENZIONE: errore")$
+if R=-1 then print("Bisogna fornire un vettore di 3 componenti")$
+if R=-2 then print("Bisogna fornire un vettore che sia un versore")$
+if R=-3 then print("Bisogna fornire un'angolo theta scalare")$
+
+asse : [0, 0, 1]$
+R : matrice_rotazione_generica(asse, theta)$
+T : matrice_rotazione(theta, z)$
+
+if R#T then print("ATTENZIONE: errore")$
+if R=-1 then print("Bisogna fornire un vettore di 3 componenti")$
+if R=-2 then print("Bisogna fornire un vettore che sia un versore")$
+if R=-3 then print("Bisogna fornire un'angolo theta scalare")$
+
+asse : [1, 0]$
+test_matrice_rotazione_generica(asse, theta)$
+
+asse : [1, 1/sqrt(3), 1/sqrt(3)]$
+test_matrice_rotazione_generica(asse, theta)$
+
+asse : [1/sqrt(3), 1/sqrt(3), 1/sqrt(3)]$
+test_matrice_rotazione_generica(asse, theta)$
+
+asse : [1, 1.1, 1/3]$
+test_matrice_rotazione_generica(asse, theta)$
+
+asse : [1.1, 1, 1/2]$
+test_matrice_rotazione_generica(asse, theta)$

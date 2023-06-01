@@ -1,0 +1,3 @@
+R : matrice_rotazione_x(theta)$
+
+v : risolvi_sistema(R - ident(3));

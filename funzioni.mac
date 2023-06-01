@@ -1,0 +1,98 @@
+coseno(x) := simplode(["let(cos(q[", x, "]), c[", x, "])"]);
+seno(x) := simplode(["let(sin(q[", x, "]), s[", x, "])"]);
+coseno2(x, y) := simplode(["let(cos(q[", x, "]+q[", y, "]), c[", x,y, "])"]);
+seno2(x, y) := simplode(["let(sin(q[", x, "]+q[", y, "]), s[", x,y, "])"]);
+coseno3(x, y, z) := simplode(["let(cos(q[", x, "]+q[", y, "]+q[", z, "]), 
+    c[", x,y,z, "])"]);
+seno3(x, y, z) := simplode(["let(sin(q[", x, "]+q[", y, "]+q[", z, "]), 
+    s[", x,y,z, "])"]);
+
+for i:1 thru 6 do (
+    eval_string(coseno(i)),
+    eval_string(seno(i))
+)$
+
+for i: 1 thru 6 do (
+    for j: 1 thru 6 do (
+        eval_string(coseno2(i, j)),
+        eval_string(seno2(i, j))
+    )
+)$
+
+for i: 1 thru 6 do (
+    for j: 1 thru 6 do (
+        for k: 1 thru 6 do (
+            eval_string(coseno3(i, j, k)),
+            eval_string(seno3(i, j, k))
+        )
+    )
+)$
+
+S(omega_x, omega_y, omega_z) := matrix(
+        [0,         -omega_z,   omega_y],
+        [omega_z,   0,          -omega_x],
+        [-omega_y,  omega_x,    0]
+)$
+
+matrice_anti_simmetrica(versore) := block(
+    [norma, r, nuovo_versore],
+
+    r : 0,
+    norma : norma_euclidea(versore),
+
+    if float(norma) - 1.0 = 0.0 then
+            r : S(versore[1], versore[2], versore[3]),
+    if float(norma) - 1.0  # 0.0 then (
+        nuovo_versore : normalizza_asse(versore),
+        r : S(nuovo_versore[1], nuovo_versore[2], nuovo_versore[3])
+    ),
+
+    r
+)$
+
+norma_euclidea(vettore) := block(
+    [r],
+    r : 0,
+    r : sqrt(ratsimp(vettore) . transpose(ratsimp(vettore)))
+)$
+
+normalizza_asse(asse) := block(
+    [norma],
+
+    norma : norma_euclidea(asse),
+    asse : asse / norma
+)$
+
+fraziona(vettore) := block(
+    [v],
+
+    v : vettore,
+
+    for i: 1 thru length(v) do (
+        v[i] : ratsimp(v[i])
+    ),
+
+    v
+)$
+
+my_atan2(s, c) := block(
+    [res, argument, n, d],
+
+    n : ratsimp(s),
+    d : ratsimp(c),
+    triginverses : true,
+
+    if (n # 0) then
+        res : atan(trigreduce(ratsimp(n/d))),
+
+    if (d > 0) then res : atan((trigreduce(ratsimp(n/d))))
+    else if (d < 0) then
+        res : atan((trigreduce(ratsimp(n/d)))) + %pi
+    else if (d = 0 and n < 0) then
+        res : -%pi/2
+    else if (d = 0 and n > 0) then
+        res : %pi/2
+    else res : -3,
+
+    res
+)$

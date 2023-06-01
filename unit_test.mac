@@ -1,0 +1,179 @@
+test_proprieta_coord_eulero(Rtheta, Runo, Rdue, Rtre):= block(
+
+    [A, B, r],
+
+    A : Rtheta,
+    B : Runo . Rdue . Rtre,
+
+    if A # trigsimp(B) then r : 0,
+    if A = trigsimp(B) then r : 1,
+
+    if r = 1 then
+        print("---> Prodotto uguale"),
+    if r # 1 then
+        print("---> Prodotto diverso")
+)$
+
+test_verifica_matrice_rotazione(M) := block(
+    [r],
+
+    r : verifica_matrice_rotazione(M),
+
+    if r = 1 then print("---> matrice di rotazione"),
+    if r = 0 then print("---> non è una matrice di rotazione")
+)$
+
+test_matrice_rotazione_generica(asse, theta) := block(
+    [R],
+
+    R : matrice_rotazione_generica(asse, theta),
+    if R=-1 then print("Bisogna fornire un vettore di 3 componenti"),
+    if R=-2 then print("Bisogna fornire un vettore che sia un versore"),
+    if R=-3 then print("Bisogna fornire un'angolo theta scalare"),
+    print(R)
+)$
+
+test_formula_rodrigues(versore, theta) := block(
+    [R, T],
+
+    R : formula_rodrigues(versore, theta),
+    T : matrice_rotazione_generica(versore, theta),
+
+    if R = -1 then print("Serve un versore di dimensione 3"),
+    if R = -2 then print("Serve uno scalare"),
+
+    print(R),
+    print(""),
+    print(""),
+    print(R-T),
+
+    if R - T # ident(3) - ident(3) then (
+        print("ATTENZIONE: errore")
+    )
+)$
+
+test_inversa_rodrigues(R) := block(
+
+    [res],
+
+    res : inversa_rodrigues(R),
+
+    if (res[1] = [-1, -1]) then
+        print("La matrice data non è di rotazione"),
+
+    if (res[1] = [-2, -2]) then
+        print("La matrice data non è 3x3"),
+
+    print(ratsimp(formula_rodrigues(res[1][2][1], res[1][1]) - R)),
+    print(""),
+    print(""),
+    print(res)
+)$
+
+test_matrice_avvitamento(asse, theta, d) := block(
+
+    [res],
+
+    res : matrice_avvitamento(asse, theta, d),
+
+    if (res = -1) then
+        print("L'asse deve essere 3x1"),
+    if (res = -2) then
+        print("L'angolo e la traslazione devono essere scalari"),
+
+    print(res)
+)$
+
+test_denavit_hartenberg(M) := block(
+
+    [res],
+
+    res : denavit_hartenberg(M),
+
+    if (res = -1) then
+        print("La matrice fornita deve avere 4 colonne"),
+
+    if (res = -2) then
+        print("Inserire una matrice con n righe e 4 colonne"),
+
+    print(letsimp(res))
+)$
+
+test_calcolo_energia_cinetica(M) := block (
+    [res, finalT, c, i, j, k, totalB],
+
+    res : calcolo_energia_cinetica(M),
+
+    totalB: zeromatrix(3,3),
+
+    res[1] : letsimp(res[1]),
+    res[2] : letsimp(res[2]),
+    for k: 1 thru length(res[2]) do (
+        for i: 1 thru length(res[2][k]) do (
+            for j: 1 thru length(res[2][k][i]) do (
+                res[2][k][i][j] : letsimp(res[2][k][i][j])
+            )
+        ),
+        totalB : totalB + res[2][k]
+    ),
+    res[3] : letsimp(res[3]),
+    for k: 1 thru length(res[3]) do (
+        for i: 1 thru length(res[3][k]) do (
+            for j: 1 thru length(res[3][k][i]) do (
+                res[3][k][i][j] : letsimp(res[3][k][i][j])
+               
+            )
+        
+        ),
+        totalB : totalB + res[3][k]
+    ),
+
+    finalT : 0,
+
+    res[1] : collectterms(expand(res[1]), v[1]),
+    for i: 2 thru length(M) do (
+        res[1] : collectterms(res[1], v[i])
+    ),
+
+    for i: 1 thru length(M) do (
+        c : ratsimp(coeff(res[1], v[i]^2)),
+        finalT : finalT + c * v[i]^2
+    ),
+
+    print("Bt:"),
+    print(res[2]),
+    print("Bw:"),
+    print(res[3]),
+    print("energia cinetica:"),
+    print(finalT),
+
+    [finalT, res[2], res[3], totalB]
+)$
+
+test_eulero_lagrange(DH) := block (
+    [res, i, j],
+
+    res : eulero_lagrange(DH),
+
+    for i: 1 thru length(res[1]) do (
+        res[1][i] : trigsimp(lhs(res[1][i])) = u[i]
+    ),
+
+    for i: 1 thru length(res[1]) do (
+        res[1][i] : collectterms(lhs(expand(res[1][i])), a),
+        res[1][i] : collectterms(res[1][i], g) = u[i]
+    ),
+
+    /*res[2] : letsimp(res[2]),*/
+    res[2] : collectterms(expand(res[2]), g),
+
+    for i: 1 thru length(res[1]) do (
+        print(equation-i),
+        print(res[1][i])
+    ),
+
+    print("potential energy:"),
+    print(res[2]),
+
+    res
+)$

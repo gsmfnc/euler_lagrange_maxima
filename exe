@@ -1,0 +1,4 @@
+#!/bin/bash
+
+python3 MAKE.py $1
+maxima -b main_script.mac -q

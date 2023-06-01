@@ -1,0 +1,15 @@
+versore : [0,1,1]$
+test_formula_rodrigues(versore, %pi/2)$
+
+declare(theta, scalar)$
+test_formula_rodrigues(versore, theta)$
+
+versore : [1, 1, 1/2]$
+test_formula_rodrigues(versore, theta)$
+
+versore : [1.0001, 1.111023, 1/2]$
+theta : %pi/5$
+test_formula_rodrigues(versore, theta)$
+
+versore : [0,1,1]$
+test_formula_rodrigues(versore, %pi/2)$

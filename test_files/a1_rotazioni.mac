@@ -1,0 +1,9 @@
+theta : %pi/6$
+matrice_rotazione_z(alpha);
+matrice_rotazione_x(theta);
+matrice_rotazione_y(theta);
+
+matrice_rotazione(alpha, x);
+matrice_rotazione(theta, y);
+matrice_rotazione(theta, z);
+matrice_rotazione(theta, j);

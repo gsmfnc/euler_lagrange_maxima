@@ -1,0 +1,49 @@
+declare(q, scalar)$
+declare(L, scalar)$
+
+/*
+doppio_pendolo : matrix(
+    [q[1], 0, 0, L[1], [0, L[1]/2, 0]],
+    [q[2], 0, 0, L[2], [0, L[2]/2, 0]]
+)$
+res : test_eulero_lagrange(doppio_pendolo)$
+
+/*suppongo masse e lunghezze tutte uguali*/
+fe : subst([L[1] = l, M[1] = m, M[2] = m, L[2] = l], res[1][1])$
+se : subst([L[1] = l, M[1] = m, M[2] = m, L[2] = l], res[1][2])$
+
+cartesiano : matrix(
+    [0, q[1], -%pi/2, 0, [0, L[1]/2, 0]],
+    [-%pi/2, q[2], -%pi/2, 0, [0, L[2]/2, 0]],
+    [0, q[3], 0, 0, [0, 0, -L[3]/2]]
+)$
+test_eulero_lagrange(cartesiano)$
+
+cilindrico : matrix(
+    [q[1], L[1], 0, 0, [0, 0, L[1]/2]],
+    [0, q[2], -%pi/2, 0, [0, L[2]/2, 0]],
+    [0, q[3], 0, 0, [0, 0, -L[3]/2]]
+)$
+test_eulero_lagrange(cilindrico)$
+
+polsosferico : matrix(
+    [q[1], L[1], -%pi/2, 0, [0, -L[1]/2, 0]],
+    [q[2], 0, -%pi/2, 0, [0, 0, 0]],
+    [q[3], L[2], 0, 0, [0, 0, -L[2]/2]]
+)$
+test_eulero_lagrange(polsosferico)$
+
+antropomorfo : matrix(
+    [q[1], L[1], -%pi/2, 0, [0, L[1]/2, 0]],
+    [q[2], 0, 0, L[2], [-L[2]/2, 0, 0]],
+    [q[3], 0, 0, L[3], [-L[3]/2, 0, 0]]
+)$
+test_eulero_lagrange(antropomorfo)$
+
+sfericostanford : matrix(
+    [q[1], L[1], -%pi/2, 0, [0, L[1]/2, 0]],
+    [q[2], L[2], %pi/2, 0, [0, -L[2]/2, 0]],
+    [0, q[3], 0, 0, [0, 0, -L[3]/2]]
+)$
+test_eulero_lagrange(sfericostanford)$
+*/

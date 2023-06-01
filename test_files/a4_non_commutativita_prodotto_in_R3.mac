@@ -1,0 +1,30 @@
+a : 0$
+b : 110$
+
+Rx_a : matrice_rotazione(a, x)$
+Ry_b : matrice_rotazione(b, y)$
+
+A : Rx_a . Ry_b;
+B : Ry_b . Rx_a;
+
+if (A # B) then r : 1$
+if (A = B) then r : 0$
+
+if r=1 then print("---> Rx(a)*Ry(b) è diverso da Ry(b)*Rx(a)")$
+if r=0 then print("---> Rx(a)*Ry(b) è uguale a Ry(b)*Rx(a)")$
+
+Rx_alpha : matrice_rotazione(alpha, x)$
+Ry_beta : matrice_rotazione(beta, y)$
+
+A : Rx_alpha . Ry_beta$
+B : Ry_beta . Rx_alpha$
+sist : []$
+
+for i: 1 thru 3 do (
+    for j: 1 thru 3 do (
+        if (A[i][j] - B[i][j]#0) then
+            sist : append(sist, [A[i][j]=B[i][j]])
+))$
+
+sist;
+soluzioni : solve(sist, [cos(alpha), cos(beta), sin(alpha), sin(beta)]);

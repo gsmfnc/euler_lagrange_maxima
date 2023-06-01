@@ -1,0 +1,23 @@
+alias(s, sin);
+alias(c, cos);
+
+A : matrix(
+[   0,  0,  0   ],
+[   0,  1,  -1  ],
+[   0,  1,  0   ]
+)$
+
+B : matrix(
+[   1,  0   ,   0       ],
+[   0,  c(45),  -s(45)  ],
+[   0,  s(45),  c(45)   ]
+)$
+
+C : matrix(
+[c(%pi/5), -s(%pi/5)],
+[s(%pi/5), c(%pi/5)]
+)$
+
+test_verifica_matrice_rotazione(A)$
+test_verifica_matrice_rotazione(B)$
+test_verifica_matrice_rotazione(C)$
